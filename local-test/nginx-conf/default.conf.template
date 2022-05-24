@@ -1,0 +1,40 @@
+log_format upstream_logging '[$time_local] $remote_addr - $remote_user - $server_name to: $upstream_addr: $request upstream_response_time $upstream_response_time msec $msec request_time $request_time';
+
+server {
+    listen       80;
+    server_name  localhost;
+
+    location / {
+        alias /etc/nginx/conf.d/html/;
+        index  index.html index.htm;
+    }
+
+    location ~ \.json {
+        root /etc/nginx/templates/records;
+    }
+
+    location /execution/ {
+        access_log /dev/stdout upstream_logging;
+        proxy_pass http://restserver:8080/execution/;
+    }
+
+    location /egistry_gitlab_com_european_language_grid_usfd_gui_ie_latest/ {
+          access_log /dev/stdout upstream_logging;
+          proxy_pass http://egistry_gitlab_com_european_language_grid_usfd_gui_ie_latest:80/;
+      }
+
+
+    location /i18n/ {
+        proxy_pass http://i18n:8080/;
+    }
+
+
+
+
+    # redirect server error pages to the static page /50x.html
+    #
+    error_page   500 502 503 504  /50x.html;
+    location = /50x.html {
+        root   /usr/share/nginx/html;
+    }
+}

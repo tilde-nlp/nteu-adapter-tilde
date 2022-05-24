@@ -1,0 +1,49 @@
+version: "3.7"
+
+services:
+  
+  nteu-test:
+    image: "${TRANSLATOR_IMAGE}"
+    environment: []
+    restart: always
+
+  nteu-test_sidecar:
+    image: "nteu-adapter-tilde"
+    network_mode: "service:nteu-test"
+    depends_on:
+      - nteu-test
+    restart: always
+
+
+  restserver:
+    image: registry.gitlab.com/european-language-grid/ilsp/elg-lt-service-execution-all:production-reactive
+    command:
+    - "--spring.webflux.base-path=/execution"
+    - "--logging.level.elg.ltserviceexecution.api=WARN"
+    - "--elg.ltservices.staticServices.nteu-test=http://nteu-test:8000/process"
+    - "--elg.base.url=http://localhost:8080/execution"
+
+    restart: always
+
+  egistry_gitlab_com_european_language_grid_usfd_gui_ie_latest:
+    image: "registry.gitlab.com/european-language-grid/usfd/gui-ie:latest"
+    restart: always
+
+  i18n:
+    image: registry.gitlab.com/european-language-grid/platform/i18n-service:latest
+    restart: always
+
+
+
+
+  frontend:
+    image: "nginx:alpine"
+    ports:
+    - "8080:80"
+    volumes:
+    - type: bind
+      source: ./nginx-conf
+      target: /etc/nginx/templates
+    restart: always
+
+

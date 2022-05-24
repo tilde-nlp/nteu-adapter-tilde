@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>ELG Local Installation</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Display:wght@600&display=swap" rel="stylesheet">
+    <style>
+      body {
+        font-family: 'Noto Sans Display', sans-serif;
+        background-color: #f8f4ed;
+        display: flex;
+        flex-direction: column;
+      }
+      body > * {
+        margin-inline: auto;
+      }
+      h1,h2 {
+        font-weight: 600;
+        width: 900px;
+        text-align: center;
+      }
+      h1 {
+        font-size: 32px;
+        margin-bottom: 32px;
+      }
+      h2 {
+        font-size: 24px;
+      }
+      iframe {
+        margin-bottom: 32px;
+        background-color: white;
+      }
+    </style>
+    
+</head>
+<body>
+<h1>European Language Grid<br/>Local Installation</h1>
+<h2>[-1] ELG Service from Docker nteu-test</h2>
+<iframe width="900" height="500" id="nteu-test" src="about:blank"></iframe>
+
+<script>
+(function() {
+  var iframe = document.getElementById('nteu-test');
+  window.addEventListener('message', function (e) {
+    if(iframe && iframe.contentWindow && e.source === iframe.contentWindow) {
+      // this is a configuration request from nteu-test
+      iframe.contentWindow.postMessage(JSON.stringify({
+        "StyleCss":" ",
+        "ServiceUrl":window.location.origin+"/execution/async/process/nteu-test",
+        "ApiRecordUrl":window.location.origin+"/nteu-test.json"
+      }), window.location.origin);
+    }
+  }, false);
+
+  iframe.src = '/egistry_gitlab_com_european_language_grid_usfd_gui_ie_latest/index-mt.html';
+})();
+
+</script>
+</body>
+</html>
