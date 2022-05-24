@@ -39,7 +39,7 @@ class NTEUAdapterTilde(QuartService):
             await asyncio.gather(
                 self.wait_for_success("gateway", lambda s: s.get(GATEWAY_READY)),
                 self.wait_for_success("segmenter", lambda s: s.post(SEGMENTER_READY, json={'texts':['test'],'lang':'en'})),
-                self.wait_for_success("backend", lambda s: s.post(BACKEND_READY, data={'texts':['test']}))
+                self.wait_for_success("backend", lambda s: s.post(BACKEND_READY, json={'texts':['test']}))
             )
         except:
             os._exit(1)
