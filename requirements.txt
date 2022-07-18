@@ -1,3 +1,2 @@
 elg[quart]
 aiohttp
-websockets
