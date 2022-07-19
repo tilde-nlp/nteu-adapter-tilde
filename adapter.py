@@ -63,17 +63,39 @@ class NTEUAdapterTilde(QuartService):
         return TextsResponse(texts=[TextsResponseObject(content=t, role="segment") for t in reply_texts])
 
     async def call_gateway(self, texts):
+        # At most one of these two will be set inside the try
+        err = None
+        content = None
         try:
-            # Make the remote call
-            async with self.session.post(GATEWAY_ENDPOINT, json={'texts':texts}) as client_response:
-                status_code = client_response.status
-                if status_code >= 400:
-                    raise ProcessingError.InternalError(await client_response.text())
-                content = await client_response.json()
-                return [t['translation'] for t in content['translations']]
+            remaining_tries = 4
+            while remaining_tries > 0:
+                # Make the remote call
+                async with self.session.post(GATEWAY_ENDPOINT, json={'texts':texts}) as client_response:
+                    status_code = client_response.status
+                    if status_code >= 400:
+                        err_text = await client_response.text()
+                        if "Schema missing" in err_text:
+                            # This is a known transient error with the backend, pause for a second and try again
+                            logger.warning(f"Got transient error from backend, {remaining_tries} attempts remaining")
+                            await asyncio.sleep(1)
+                            remaining_tries -= 1
+                        else:
+                            err = ProcessingError.InternalError(err_text)
+                            remaining_tries = 0
+                    else:
+                        content = await client_response.json()
+                        remaining_tries = 0
         except:
             traceback.print_exc()
             raise ProcessingError.InternalError('Error calling API')
+
+        if err:
+            raise err
+        elif content:
+            return [t['translation'] for t in content['translations']]
+        else:
+            # Ran out of retries
+            raise ProcessingError.InternalError("no response from backend")
 
 
 service = NTEUAdapterTilde("NTEUAdapter")
